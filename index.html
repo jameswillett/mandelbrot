@@ -1,0 +1,149 @@
+<html>
+  <head>
+  </head>
+  <body style="margin: 0px;">
+    <div>
+      <canvas id="brot" width="10000" height="10000" />
+    </div>
+    <script async>
+      const canvas = document.getElementById("brot");
+
+      const RESOLUTION = canvas.clientWidth;
+
+      // number of iterations we stop at to define a pixel as in the mandelbrot set (black)
+      // lower is faster but will give you a less defined final image
+      const MAX_ITER = 100;
+
+      class Complex {
+        constructor(r, i) {
+          this.r = r;
+          this.i = i;
+        }
+
+        toString() {
+          return `${this.r} ${this.i < 0 ? "-" : "+"} ${Math.abs(this.i)}i`;
+        }
+
+        add(x) {
+          let r, i;
+          if (x instanceof Complex) {
+            r = this.r + x.r;
+            i = this.i + x.i;
+          } else if (typeof x === "number") {
+            r = this.r + x;
+            i = this.i;
+          }
+          return new Complex(r, i);
+        }
+
+        sub(x) {
+          let r, i;
+          if (x instanceof Complex) {
+            r = this.r - x.r;
+            i = this.i - x.i;
+          } else if (typeof x === "number") {
+            r = this.r - x;
+            i = this.i;
+          }
+          return new Complex(r, i);
+        }
+
+        mul(x) {
+          let r, i;
+          if (x instanceof Complex) {
+            r = (this.r * x.r) - (this.i * x.i);
+            i = (this.r * this.i) + (x.r * x.i);
+          } else if (typeof x === "number") {
+            r = this.r * x;
+            i = this.i * x;
+          }
+          return new Complex(r, i);
+        }
+
+        square() {
+          return this.mul(this);
+        }
+
+        // distance from point to (0, 0)
+        abs() {
+          return Math.sqrt((this.r ** 2) + (this.i ** 2))
+        }
+
+        // sets `Z(0)` of the julia function
+        juliaInit() {
+          return new Complex(0, 0);
+        }
+
+        // next.square().add(this) is the equivalent to `Z(n) = Z(n-1)^2 + c`
+        juliaFunction(next) {
+          return next.square().add(this);
+        }
+
+
+        stepsToInfinity() {
+          let iterations = 0;
+          let next = this.juliaInit();
+          while (iterations < MAX_ITER) {
+            if (next.abs() > 2) {
+              break;
+            }
+            ++iterations;
+            next = this.juliaFunction(next);
+          }
+          return iterations
+        }
+      }
+
+      const invertSteps = (n) => {
+        return (n * -1) + MAX_ITER;
+      }
+
+      const getColor = (n) => {
+        const _n = invertSteps(n);
+        const hex = Math.floor((_n * 0xfff) / MAX_ITER).toString(16).padStart(3, "0");
+        return [...hex].map(x => parseInt(x, 16) * 17);
+      }
+
+      const getGreyscale = (n) => {
+        return (invertSteps(n) / MAX_ITER) * 0xff
+      }
+
+
+      const scale = (value, outMin, outMax) => {
+        return (value) * (outMax - outMin) / RESOLUTION + outMin;
+      }
+
+      const ctx = canvas.getContext("2d", { alpha: false })
+      const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
+      const pixels = imageData.data;
+
+      for (let y = 0; y <= RESOLUTION; ++y) {
+        for (let x = 0; x <= RESOLUTION; ++x) {
+          const normX = scale(x, -2, 2);
+          const normY = scale(y, -2, 2);
+          const complex = new Complex(normX, normY);
+          const steps = complex.stepsToInfinity();
+          const offset = ((y * RESOLUTION) + x) * 4;
+
+          const gs = getGreyscale(steps); // brightness of given pixel
+          const [r,g,b] = getColor(steps); // tuple of RGB values between 0 and 255
+
+          // r
+          pixels[offset] = gs;
+
+          // g
+          pixels[offset + 1] = g;
+
+          // b
+          pixels[offset + 2] = gs;
+
+          // a (dont need if `{alpha: false}`)
+          // pixels[offset + 3] = 255;
+        };
+      };
+
+
+      ctx.putImageData(imageData, 0, 0)
+    </script>
+  </body>
+</html>
