@@ -3,7 +3,7 @@
   </head>
   <body style="margin: 0px;">
     <div>
-      <canvas id="brot" width="10000" height="10000" />
+      <canvas id="brot" width="5000" height="5000" />
     </div>
     <script async>
       const canvas = document.getElementById("brot");
@@ -83,10 +83,7 @@
         stepsToInfinity() {
           let iterations = 0;
           let next = this.juliaInit();
-          while (iterations < MAX_ITER) {
-            if (next.abs() > 2) {
-              break;
-            }
+          while (iterations < MAX_ITER && next.abs() < 2) {
             ++iterations;
             next = this.juliaFunction(next);
           }
@@ -126,13 +123,13 @@
           const offset = ((y * RESOLUTION) + x) * 4;
 
           const gs = getGreyscale(steps); // brightness of given pixel
-          const [r,g,b] = getColor(steps); // tuple of RGB values between 0 and 255
+          // const [r,g,b] = getColor(steps); // tuple of RGB values between 0 and 255
 
           // r
           pixels[offset] = gs;
 
           // g
-          pixels[offset + 1] = g;
+          pixels[offset + 1] = gs;
 
           // b
           pixels[offset + 2] = gs;
