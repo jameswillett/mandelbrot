@@ -137,7 +137,7 @@
         MIN_Y = SCALE * (2 + CENTER.i);
 
         document.getElementById("centered-value").textContent = CENTER.toString();
-        document.getElementById("scale-value").textContent = 1/SCALE;
+        document.getElementById("scale-value").textContent = `2^${Math.log2(1/SCALE)}`;
       }
 
       initValues();
@@ -221,7 +221,7 @@
         recenterAndZoom(complex);
         doWork();
         document.getElementById("centered-value").textContent = complex.toString();
-        document.getElementById("scale-value").textContent = 1/SCALE;
+        document.getElementById("scale-value").textContent = `2^${Math.log2(1/SCALE)}`;
       };
       canvas.addEventListener("click", getClickedValue);
 
