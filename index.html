@@ -1,18 +1,34 @@
 <html>
   <head>
+    <link rel="stylesheet" href="index.css">
   </head>
-  <body style="margin: 0px;">
-    <div>
-      <canvas id="brot" width="5000" height="5000" />
+  <body>
+    <div id="brot-container">
+      <div>
+        <div id="ui">
+          <div>
+            <div>
+            <span>zoom amount: <span id="scale-value"></span></span>
+            <span>,&nbsp;</span>
+            <span>centered at: <span id="centered-value"></span></span>
+            </div>
+            <div id="hovered-value"></div>
+          </div>
+          <div>
+            <button id="reset-button">reset</button>
+          </div>
+        </div>
+        <canvas id="brot" width="1000" height="1000" />
+      </div>
     </div>
-    <script async>
+    <script>
       const canvas = document.getElementById("brot");
 
       const RESOLUTION = canvas.clientWidth;
 
       // number of iterations we stop at to define a pixel as in the mandelbrot set (black)
       // lower is faster but will give you a less defined final image
-      const MAX_ITER = 100;
+      const MAX_ITER = 127;
 
       class Complex {
         constructor(r, i) {
@@ -110,37 +126,95 @@
         return (value) * (outMax - outMin) / RESOLUTION + outMin;
       }
 
-      const ctx = canvas.getContext("2d", { alpha: false })
-      const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
-      const pixels = imageData.data;
+      let CENTER, SCALE, MAX_X, MAX_Y, MIN_X, MIN_Y;
 
-      for (let y = 0; y <= RESOLUTION; ++y) {
-        for (let x = 0; x <= RESOLUTION; ++x) {
-          const normX = scale(x, -2, 2);
-          const normY = scale(y, -2, 2);
-          const complex = new Complex(normX, normY);
-          const steps = complex.stepsToInfinity();
-          const offset = ((y * RESOLUTION) + x) * 4;
+      const initValues = () => {
+        CENTER = new Complex(0, 0);
+        SCALE = 1;
+        MAX_X = SCALE * (2 + CENTER.r);
+        MIN_X = SCALE * (-2 + CENTER.r);
+        MAX_Y = SCALE * (-2 + CENTER.i);
+        MIN_Y = SCALE * (2 + CENTER.i);
 
-          const gs = getGreyscale(steps); // brightness of given pixel
-          // const [r,g,b] = getColor(steps); // tuple of RGB values between 0 and 255
+        document.getElementById("centered-value").textContent = CENTER.toString();
+        document.getElementById("scale-value").textContent = 1/SCALE;
+      }
 
-          // r
-          pixels[offset] = gs;
+      initValues();
 
-          // g
-          pixels[offset + 1] = gs;
+      const recenterAndZoom = (newCenter) => {
+        CENTER = newCenter;
+        SCALE *= 0.5;
+        MAX_X = (SCALE * 2) + CENTER.r;
+        MIN_X = (SCALE * -2) + CENTER.r;
+        MAX_Y = (SCALE * -2) + CENTER.i;
+        MIN_Y = (SCALE * 2) + CENTER.i;
+      }
 
-          // b
-          pixels[offset + 2] = gs;
+      const ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true })
 
-          // a (dont need if `{alpha: false}`)
-          // pixels[offset + 3] = 255;
+      const doWork = () => {
+        const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
+        const pixels = imageData.data;
+
+        for (let y = 0; y <= RESOLUTION; ++y) {
+          for (let x = 0; x <= RESOLUTION; ++x) {
+            const normX = scale(x, MIN_X, MAX_X);
+            const normY = scale(y, MIN_Y, MAX_Y);
+            const complex = new Complex(normX, normY);
+            const steps = complex.stepsToInfinity();
+            const offset = ((y * RESOLUTION) + x) * 4;
+
+            // const gs = getGreyscale(steps); // brightness of given pixel
+            const [r,g,b] = getColor(steps); // tuple of RGB values between 0 and 255
+
+            // r
+            pixels[offset] = r;
+
+            // g
+            pixels[offset + 1] = g;
+
+            // b
+            pixels[offset + 2] = b;
+
+            // a (dont need if `{alpha: false}`)
+            // pixels[offset + 3] = 255;
+          };
         };
+
+        ctx.putImageData(imageData, 0, 0)
+      }
+
+      const getHoveredValue = (event) => {
+        const bounding = canvas.getBoundingClientRect();
+        const x = event.clientX - bounding.left;
+        const y = event.clientY - bounding.top;
+        const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
+
+        document.getElementById("hovered-value").textContent = complex.toString();
       };
 
+      canvas.addEventListener("mousemove", getHoveredValue);
 
-      ctx.putImageData(imageData, 0, 0)
+      const getClickedValue = (event) => {
+        const bounding = canvas.getBoundingClientRect();
+        const x = event.clientX - bounding.left;
+        const y = event.clientY - bounding.top;
+        const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
+
+        recenterAndZoom(complex);
+        doWork();
+        document.getElementById("centered-value").textContent = complex.toString();
+        document.getElementById("scale-value").textContent = 1/SCALE;
+      };
+      canvas.addEventListener("click", getClickedValue);
+
+      document.getElementById("reset-button").addEventListener("click", () => {
+        initValues();
+        doWork();
+      });
+
+      document.body.onload = doWork;
     </script>
   </body>
 </html>

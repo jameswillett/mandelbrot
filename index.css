@@ -1,0 +1,13 @@
+body {
+  margin: 0px;
+}
+
+#brot-container {
+  display: flex;
+  justify-content: center;
+}
+
+#ui {
+  display: flex;
+  justify-content: space-between;
+}
