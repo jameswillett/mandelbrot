@@ -27,7 +27,7 @@
 
       // number of iterations we stop at to define a pixel as in the mandelbrot set (black)
       // lower is faster but will give you a less defined final image
-      const MAX_ITER = 0xfe;
+      const MAX_ITER = 0xff;
 
       class Complex {
         constructor(r, i) {
@@ -98,7 +98,7 @@
         stepsToInfinity() {
           let iterations = 0;
           let next = this.juliaInit();
-          while (iterations < MAX_ITER && next.abs() < 2) {
+          while (iterations < MAX_ITER && next.abs() < 2 && this.abs() < 2) {
             ++iterations;
             next = this.juliaFunction(next);
           }
@@ -190,11 +190,11 @@
         const y = event.clientY - bounding.top;
         const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
 
-        return complex.toString();
+        return complex;
       };
 
       const setHoveredValue = (v) => {
-        document.getElementById("hovered-value").textContent = `hovered at: ${v}`;
+        document.getElementById("hovered-value").textContent = `hovered at: (${v.stepsToInfinity()} steps) ${v.toString()}`;
       }
 
       const clearHoveredValue = () => {
