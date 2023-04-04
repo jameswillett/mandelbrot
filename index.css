@@ -2,6 +2,12 @@ body {
   margin: 0px;
 }
 
+* {
+  font-family: monospace;
+  font-weight: 500;
+  font-size: 18px;
+}
+
 #brot-container {
   display: flex;
   justify-content: center;
@@ -9,5 +15,8 @@ body {
 
 #ui {
   display: flex;
+  padding: 4px 0;
+  height: 2rem;
   justify-content: space-between;
+  align-items: center;
 }

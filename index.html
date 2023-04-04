@@ -28,7 +28,7 @@
 
       // number of iterations we stop at to define a pixel as in the mandelbrot set (black)
       // lower is faster but will give you a less defined final image
-      const MAX_ITER = 127;
+      const MAX_ITER = 0xfe;
 
       class Complex {
         constructor(r, i) {
@@ -191,10 +191,26 @@
         const y = event.clientY - bounding.top;
         const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
 
-        document.getElementById("hovered-value").textContent = complex.toString();
+        return complex.toString();
       };
 
-      canvas.addEventListener("mousemove", getHoveredValue);
+      const setHoveredValue = (v) => {
+        document.getElementById("hovered-value").textContent = `hovered at: ${v}`;
+      }
+
+      const clearHoveredValue = () => {
+        document.getElementById("hovered-value").textContent = "";
+      }
+
+      canvas.addEventListener("mousemove", (e) => {
+        setHoveredValue(getHoveredValue(e));
+      });
+
+      canvas.addEventListener("mouseover", (e) => {
+        setHoveredValue(getHoveredValue(e));
+      });
+
+      canvas.addEventListener("mouseout", clearHoveredValue);
 
       const getClickedValue = (event) => {
         const bounding = canvas.getBoundingClientRect();
