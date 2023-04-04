@@ -4,22 +4,21 @@
   </head>
   <body>
     <div id="brot-container">
-      <div>
-        <div id="ui">
+      <div id="ui">
+        <div>
           <div>
-            <div>
-            <span>zoom amount: <span id="scale-value"></span></span>
-            <span>,&nbsp;</span>
-            <span>centered at: <span id="centered-value"></span></span>
-            </div>
-            <div id="hovered-value"></div>
+          <span>zoom amount: <span id="scale-value"></span></span>
+          <span>,&nbsp;</span>
+          <span>centered at: <span id="centered-value"></span></span>
           </div>
-          <div>
-            <button id="reset-button">reset</button>
-          </div>
+          <div id="hovered-value"></div>
         </div>
-        <canvas id="brot" width="1000" height="1000" />
+        <div>
+          <button id="reset-button">reset</button>
+        </div>
       </div>
+      <canvas id="brot" width="1000" height="1000"></canvas>
+      <div id="helper">click wherever you want to zoom</div>
     </div>
     <script>
       const canvas = document.getElementById("brot");
@@ -219,9 +218,13 @@
         const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
 
         recenterAndZoom(complex);
-        doWork();
         document.getElementById("centered-value").textContent = complex.toString();
         document.getElementById("scale-value").textContent = `2^${Math.log2(1/SCALE)}`;
+        const h = document.getElementById("helper");
+        if (h) {
+          h.remove();
+        }
+        doWork();
       };
       canvas.addEventListener("click", getClickedValue);
 
