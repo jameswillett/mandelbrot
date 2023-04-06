@@ -4,6 +4,10 @@ body {
   justify-content: center;
 }
 
+canvas:hover {
+  cursor: crosshair;
+}
+
 * {
   font-family: monospace;
   font-weight: 500;
