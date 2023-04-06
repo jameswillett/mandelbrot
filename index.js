@@ -184,7 +184,7 @@ canvas.addEventListener("mouseout", clearHoveredValue);
 canvas.addEventListener("click", handleClick);
 
 document.getElementById("fidelity").addEventListener("change", (e) => {
-  MAX_ITER = [0x100, 0x200, 0x400][e.target.value];
+  MAX_ITER = [0x100, 0x200, 0x400, 0x800, 0x1000][e.target.value];
   doWork();
 });
 
