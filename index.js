@@ -81,111 +81,93 @@ class Complex {
 }
 
 const invertSteps = (n) => (n * -1) + MAX_ITER;
-const greyscaleLinear = (n) => {
-  const r = (invertSteps(n) / MAX_ITER) * 0xff;
-  const g = (invertSteps(n) / MAX_ITER) * 0xff;
-  const b = (invertSteps(n) / MAX_ITER) * 0xff;
-  return [r, g, b];
-};
-
-const gradiatedGreyscale = (n) => {
-  if (n >= MAX_ITER) return [0, 0, 0];
-  if (n <= 0) return [0xff, 0xff, 0xff];
-  const gs = (n % 64) * 4;
-  return [gs, gs, gs];
-};
-
-const defaultColor = (n) => {
-  if (n >= MAX_ITER) return [0, 0, 0];
-  if (n <= 0) return [0xff, 0xff, 0xff];
-  const r = n < (MAX_ITER / 2) ? (n % 0x80) * 2 : 0x80;
-  const g = (n % 0x40) * 4;
-  const b = n < (MAX_ITER / 2) ? 0x80 : ((n % 2) * 0x80 * -1) + 0xff;
-  return [r, g, b];
-};
-
-const primeGlow = (n) => {
-  if (n >= MAX_ITER) return [0, 0, 0];
-  if (n <= 0) return [0xff, 0xff, 0xff];
-  const r = Math.floor((Math.sin(n / 37) + 1) * 0x80);
-  const g = Math.floor((Math.cos(n / 7) + 1) * 0x80);
-  const b = Math.floor((Math.sinh(n / 29) + 1) * 0x80);
-
-  return [r, g, b];
-};
 const randomColorArr = [];
-const randomColor = (n) => {
-  if (n >= MAX_ITER) return [0, 0, 0];
-  if (n <= 0) return [0xff, 0xff, 0xff];
-  if (randomColorArr[n]) return randomColorArr[n];
 
-  const r = Math.floor(Math.random() * 0xff);
-  const g = Math.floor(Math.random() * 0xff);
-  const b = Math.floor(Math.random() * 0xff);
+const colorFns = {
+  greyscaleLinear: (n) => {
+    const r = (invertSteps(n) / MAX_ITER) * 0xff;
+    const g = (invertSteps(n) / MAX_ITER) * 0xff;
+    const b = (invertSteps(n) / MAX_ITER) * 0xff;
+    return [r, g, b];
+  },
 
-  randomColorArr[n] = [r, g, b];
-  return [r, g, b];
+  gradiatedGreyscale: (n) => {
+    const gs = (n % 64) * 4;
+    return [gs, gs, gs];
+  },
+
+  defaultColor: (n) => {
+    const r = n < (MAX_ITER / 2) ? (n % 0x80) * 2 : 0x80;
+    const g = (n % 0x40) * 4;
+    const b = n < (MAX_ITER / 2) ? 0x80 : ((n % 2) * 0x80 * -1) + 0xff;
+    return [r, g, b];
+  },
+
+  primeGlow: (n) => {
+    const r = Math.floor((Math.sin(n / 37) + 1) * 0x80);
+    const g = Math.floor((Math.cos(n / 7) + 1) * 0x80);
+    const b = Math.floor((Math.sinh(n / 29) + 1) * 0x80);
+
+    return [r, g, b];
+  },
+  randomColor: (n) => {
+    if (randomColorArr[n]) return randomColorArr[n];
+
+    const r = Math.floor(Math.random() * 0xff);
+    const g = Math.floor(Math.random() * 0xff);
+    const b = Math.floor(Math.random() * 0xff);
+
+    randomColorArr[n] = [r, g, b];
+    return [r, g, b];
+  },
+
+  rainbow: (n) => {
+    const nMod = n % 192;
+    const mMod = nMod % 32;
+
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    const INCREASING = mMod * 8;
+    const DECREASING = 0xff - (mMod * 8);
+    if (nMod < 32) {
+      r = INCREASING;
+      g = 0;
+      b = 0xff;
+    } else if (nMod < 64) {
+      r = 0xff;
+      g = 0;
+      b = DECREASING;
+    } else if (nMod < 96) {
+      r = 0xff;
+      g = INCREASING;
+      b = 0;
+    } else if (nMod < 128) {
+      r = DECREASING;
+      g = 0xff;
+      b = 0;
+    } else if (nMod < 160) {
+      r = 0;
+      g = 0xff;
+      b = INCREASING;
+    } else {
+      r = 0;
+      g = DECREASING;
+      b = 0xff;
+    }
+
+    return [r, g, b];
+  },
 };
 
-const rainbow = (n) => {
+let colorFunc = "defaultColor";
+
+const getColor = (n) => {
   if (n >= MAX_ITER) return [0, 0, 0];
   if (n <= 0) return [0xff, 0xff, 0xff];
-  const nMod = n % 192;
-  const mMod = nMod % 32;
 
-  let r = 0;
-  let g = 0;
-  let b = 0;
-
-  const INCREASING = mMod * 8;
-  const DECREASING = 0xff - (mMod * 8);
-  if (nMod < 32) {
-    r = INCREASING;
-    g = 0;
-    b = 0xff;
-  } else if (nMod < 64) {
-    r = 0xff;
-    g = 0;
-    b = DECREASING;
-  } else if (nMod < 96) {
-    r = 0xff;
-    g = INCREASING;
-    b = 0;
-  } else if (nMod < 128) {
-    r = DECREASING;
-    g = 0xff;
-    b = 0;
-  } else if (nMod < 160) {
-    r = 0;
-    g = 0xff;
-    b = INCREASING;
-  } else {
-    r = 0;
-    g = DECREASING;
-    b = 0xff;
-  }
-
-  return [r, g, b];
-};
-
-let colorFunc = "greyscale";
-
-const getColorFunction = () => {
-  switch (colorFunc) {
-    case "randomColor":
-      return randomColor;
-    case "greyscaleLinear":
-      return greyscaleLinear;
-    case "gradiatedGreyscale":
-      return gradiatedGreyscale;
-    case "primeGlow":
-      return primeGlow;
-    case "rainbow":
-      return rainbow;
-    case "defaultColor":
-    default:
-      return defaultColor;
-  }
+  return (colorFns[colorFunc] || colorFns.defaultColor)(n);
 };
 
 const scale = (value, outMin, outMax) => ((value) * (outMax - outMin)) / RESOLUTION + outMin;
@@ -218,13 +200,10 @@ const recenterAndZoom = (newCenter) => {
 };
 
 const ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
+const pixels = imageData.data;
 
 const doWork = () => {
-  const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
-  const pixels = imageData.data;
-
-  const color = getColorFunction();
-
   for (let y = 0; y <= RESOLUTION; ++y) {
     for (let x = 0; x <= RESOLUTION; ++x) {
       const normX = scale(x, MIN_X, MAX_X);
@@ -233,7 +212,7 @@ const doWork = () => {
       const steps = complex.stepsToInfinity();
       const offset = ((y * RESOLUTION) + x) * 4;
 
-      const [r, g, b] = color(steps); // tuple of RGB values between 0 and 255
+      const [r, g, b] = getColor(steps); // tuple of RGB values between 0 and 255
       // r
       pixels[offset] = r;
       // g
