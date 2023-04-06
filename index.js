@@ -4,7 +4,7 @@ const RESOLUTION = canvas.clientWidth;
 
 // number of iterations we stop at to define a pixel as in the mandelbrot set (black)
 // lower is faster but will give you a less defined final image
-const MAX_ITER = 0xff;
+let MAX_ITER = 0x100;
 
 class Complex {
   constructor(r, i) {
@@ -85,9 +85,9 @@ class Complex {
 const getColor = (n) => {
   if (n >= MAX_ITER) return [0, 0, 0];
   if (n <= 0) return [0xff, 0xff, 0xff];
-  const r = (n % 128) * 2;
-  const g = (n % 64) * 4;
-  const b = ((n % 2) * -128) + 0xff;
+  const r = n < (MAX_ITER / 2) ? (n % 0x80) * 2 : 0x80;
+  const g = (n % 0x40) * 4;
+  const b = n < (MAX_ITER / 2) ? 0x80 : ((n % 2) * 0x80 * -1) + 0xff;
   return [r, g, b];
 };
 
@@ -182,6 +182,11 @@ canvas.addEventListener("mousemove", handleHover);
 canvas.addEventListener("mouseover", handleHover);
 canvas.addEventListener("mouseout", clearHoveredValue);
 canvas.addEventListener("click", handleClick);
+
+document.getElementById("fidelity").addEventListener("change", (e) => {
+  MAX_ITER = [0x100, 0x200, 0x400][e.target.value];
+  doWork();
+});
 
 const initAndDoWork = () => {
   initValues();
