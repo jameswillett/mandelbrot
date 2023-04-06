@@ -127,6 +127,47 @@ const randomColor = (n) => {
   return [r, g, b];
 };
 
+const rainbow = (n) => {
+  if (n >= MAX_ITER) return [0, 0, 0];
+  if (n <= 0) return [0xff, 0xff, 0xff];
+  const nMod = n % 192;
+  const mMod = nMod % 32;
+
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  const INCREASING = mMod * 8;
+  const DECREASING = 0xff - (mMod * 8);
+  if (nMod < 32) {
+    r = INCREASING;
+    g = 0;
+    b = 0xff;
+  } else if (nMod < 64) {
+    r = 0xff;
+    g = 0;
+    b = DECREASING;
+  } else if (nMod < 96) {
+    r = 0xff;
+    g = INCREASING;
+    b = 0;
+  } else if (nMod < 128) {
+    r = DECREASING;
+    g = 0xff;
+    b = 0;
+  } else if (nMod < 160) {
+    r = 0;
+    g = 0xff;
+    b = INCREASING;
+  } else {
+    r = 0;
+    g = DECREASING;
+    b = 0xff;
+  }
+
+  return [r, g, b];
+};
+
 let colorFunc = "greyscale";
 
 const getColorFunction = () => {
@@ -139,6 +180,8 @@ const getColorFunction = () => {
       return gradiatedGreyscale;
     case "primeGlow":
       return primeGlow;
+    case "rainbow":
+      return rainbow;
     case "defaultColor":
     default:
       return defaultColor;
