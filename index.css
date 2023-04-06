@@ -19,7 +19,7 @@ body {
   width: 100%;
   display: flex;
   padding: 4px 0;
-  height: 2rem;
+  height: 4rem;
   justify-content: space-between;
   align-items: center;
 }
@@ -31,4 +31,8 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  display: flex;
+}
+
+#dropdowns {
 }

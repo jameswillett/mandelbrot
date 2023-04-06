@@ -80,9 +80,22 @@ class Complex {
   }
 }
 
-// const invertSteps = (n) => (n * -1) + MAX_ITER;
+const invertSteps = (n) => (n * -1) + MAX_ITER;
+const greyscaleLinear = (n) => {
+  const r = (invertSteps(n) / MAX_ITER) * 0xff;
+  const g = (invertSteps(n) / MAX_ITER) * 0xff;
+  const b = (invertSteps(n) / MAX_ITER) * 0xff;
+  return [r, g, b];
+};
 
-const getColor = (n) => {
+const gradiatedGreyscale = (n) => {
+  if (n >= MAX_ITER) return [0, 0, 0];
+  if (n <= 0) return [0xff, 0xff, 0xff];
+  const gs = (n % 64) * 4;
+  return [gs, gs, gs];
+};
+
+const defaultColor = (n) => {
   if (n >= MAX_ITER) return [0, 0, 0];
   if (n <= 0) return [0xff, 0xff, 0xff];
   const r = n < (MAX_ITER / 2) ? (n % 0x80) * 2 : 0x80;
@@ -91,7 +104,46 @@ const getColor = (n) => {
   return [r, g, b];
 };
 
-// const getGreyscale = (n) => (invertSteps(n) / MAX_ITER) * 0xff;
+const primeGlow = (n) => {
+  if (n >= MAX_ITER) return [0, 0, 0];
+  if (n <= 0) return [0xff, 0xff, 0xff];
+  const r = Math.floor((Math.sin(n / 37) + 1) * 0x80);
+  const g = Math.floor((Math.cos(n / 7) + 1) * 0x80);
+  const b = Math.floor((Math.sinh(n / 29) + 1) * 0x80);
+
+  return [r, g, b];
+};
+const randomColorArr = [];
+const randomColor = (n) => {
+  if (n >= MAX_ITER) return [0, 0, 0];
+  if (n <= 0) return [0xff, 0xff, 0xff];
+  if (randomColorArr[n]) return randomColorArr[n];
+
+  const r = Math.floor(Math.random() * 0xff);
+  const g = Math.floor(Math.random() * 0xff);
+  const b = Math.floor(Math.random() * 0xff);
+
+  randomColorArr[n] = [r, g, b];
+  return [r, g, b];
+};
+
+let colorFunc = "greyscale";
+
+const getColorFunction = () => {
+  switch (colorFunc) {
+    case "randomColor":
+      return randomColor;
+    case "greyscaleLinear":
+      return greyscaleLinear;
+    case "gradiatedGreyscale":
+      return gradiatedGreyscale;
+    case "primeGlow":
+      return primeGlow;
+    case "defaultColor":
+    default:
+      return defaultColor;
+  }
+};
 
 const scale = (value, outMin, outMax) => ((value) * (outMax - outMin)) / RESOLUTION + outMin;
 let CENTER; let SCALE; let MAX_X; let MAX_Y; let MIN_X; let
@@ -128,6 +180,8 @@ const doWork = () => {
   const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
   const pixels = imageData.data;
 
+  const color = getColorFunction();
+
   for (let y = 0; y <= RESOLUTION; ++y) {
     for (let x = 0; x <= RESOLUTION; ++x) {
       const normX = scale(x, MIN_X, MAX_X);
@@ -136,8 +190,7 @@ const doWork = () => {
       const steps = complex.stepsToInfinity();
       const offset = ((y * RESOLUTION) + x) * 4;
 
-      // const gs = getGreyscale(steps); // brightness of given pixel
-      const [r, g, b] = getColor(steps); // tuple of RGB values between 0 and 255
+      const [r, g, b] = color(steps); // tuple of RGB values between 0 and 255
       // r
       pixels[offset] = r;
       // g
@@ -185,6 +238,11 @@ canvas.addEventListener("click", handleClick);
 
 document.getElementById("fidelity").addEventListener("change", (e) => {
   MAX_ITER = [0x100, 0x200, 0x400, 0x800, 0x1000][e.target.value];
+  doWork();
+});
+
+document.getElementById("color").addEventListener("change", (e) => {
+  colorFunc = e.target.value;
   doWork();
 });
 
