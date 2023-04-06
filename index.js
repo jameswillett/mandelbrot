@@ -71,7 +71,7 @@ class Complex {
 
   stepsToInfinity() {
     let iterations = 0;
-    let next = new Complex(0, 0);
+    let next = new Complex(this.r, this.i);
     while (iterations < MAX_ITER && next.abs() < 2 && this.abs() < 2) {
       ++iterations;
       next = this.juliaFunction(next);
@@ -85,14 +85,12 @@ const randomColorArr = [];
 
 const colorFns = {
   greyscaleLinear: (n) => {
-    const r = (invertSteps(n) / MAX_ITER) * 0xff;
-    const g = (invertSteps(n) / MAX_ITER) * 0xff;
-    const b = (invertSteps(n) / MAX_ITER) * 0xff;
-    return [r, g, b];
+    const gs = (invertSteps(n) / MAX_ITER) * 0xff;
+    return [gs, gs, gs];
   },
 
   gradiatedGreyscale: (n) => {
-    const gs = (n % 64) * 4;
+    const gs = (invertSteps(n) % 64) * 4;
     return [gs, gs, gs];
   },
 
@@ -203,12 +201,11 @@ const ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
 const imageData = ctx.getImageData(0, 0, RESOLUTION, RESOLUTION);
 const pixels = imageData.data;
 
+const complexNumFromCoords = (x, y) => new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
 const doWork = () => {
   for (let y = 0; y <= RESOLUTION; ++y) {
     for (let x = 0; x <= RESOLUTION; ++x) {
-      const normX = scale(x, MIN_X, MAX_X);
-      const normY = scale(y, MIN_Y, MAX_Y);
-      const complex = new Complex(normX, normY);
+      const complex = complexNumFromCoords(x, y);
       const steps = complex.stepsToInfinity();
       const offset = ((y * RESOLUTION) + x) * 4;
 
@@ -229,16 +226,18 @@ const handleHover = (event) => {
   const bounding = canvas.getBoundingClientRect();
   const x = event.clientX - bounding.left;
   const y = event.clientY - bounding.top;
-  const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
+  const complex = complexNumFromCoords(x, y);
 
-  document.getElementById("hovered-value").textContent = `hovered at: (${complex.stepsToInfinity()} steps) ${complex.toString()}`;
+  const steps = complex.stepsToInfinity();
+
+  document.getElementById("hovered-value").textContent = `hovered at: (${steps} step${steps !== 1 ? "s" : ""}) ${complex.toString()}`;
 };
 
 const handleClick = (event) => {
   const bounding = canvas.getBoundingClientRect();
   const x = event.clientX - bounding.left;
   const y = event.clientY - bounding.top;
-  const complex = new Complex(scale(x, MIN_X, MAX_X), scale(y, MIN_Y, MAX_Y));
+  const complex = complexNumFromCoords(x, y);
 
   recenterAndZoom(complex);
   setStaticUIValues();
