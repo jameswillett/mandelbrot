@@ -1,0 +1,24 @@
+{
+  "name": "mandelbrot",
+  "version": "1.0.0",
+  "description": "drawing the mandelbrot set in vanilla JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jameswillett/mandelbrot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jameswillett/mandelbrot/issues"
+  },
+  "homepage": "https://github.com/jameswillett/mandelbrot#readme",
+  "devDependencies": {
+    "eslint": "^8.37.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5"
+  }
+}
