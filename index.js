@@ -222,11 +222,15 @@ const doWork = () => {
   ctx.putImageData(imageData, 0, 0);
 };
 
-const handleHover = (event) => {
+const getComplexNumFromMousePosition = (event) => {
   const bounding = canvas.getBoundingClientRect();
   const x = event.clientX - bounding.left;
   const y = event.clientY - bounding.top;
-  const complex = complexNumFromCoords(x, y);
+  return complexNumFromCoords(x, y);
+};
+
+const handleHover = (event) => {
+  const complex = getComplexNumFromMousePosition(event);
 
   const steps = complex.stepsToInfinity();
 
@@ -234,10 +238,7 @@ const handleHover = (event) => {
 };
 
 const handleClick = (event) => {
-  const bounding = canvas.getBoundingClientRect();
-  const x = event.clientX - bounding.left;
-  const y = event.clientY - bounding.top;
-  const complex = complexNumFromCoords(x, y);
+  const complex = getComplexNumFromMousePosition(event);
 
   recenterAndZoom(complex);
   setStaticUIValues();
